@@ -2,14 +2,8 @@
 
 
 #define MAX_WALKER_TARGET 400
-int vector_x[8] = {0, 0, 1, -1, 1, 1, -1, -1};
-int vector_y[8] = {1, -1, 0, 0, 1, -1, 1, -1};
-int max_radius = 0;
 
-int center_x = SIM_X_SIZE / 2 + 1;
-int center_y = SIM_Y_SIZE / 2 + 1;
-
-static int limitColor(int color) {
+int limitColor(int color) {
     if (color < 0)
         return 0;
 
@@ -19,7 +13,7 @@ static int limitColor(int color) {
     return color;
 }
 
-static int calc_radius(int x, int y) {
+int calc_radius(int x, int y, int center_x, int center_y) {
     int dx = x - center_x;
     int dy = y - center_y;
 
@@ -33,32 +27,32 @@ static int calc_radius(int x, int y) {
     return dy;
 }
 
-static void update_radius(int x, int y) {
-    int radius = calc_radius(x, y);
-    if (radius > max_radius)
-        max_radius = radius;
+void update_radius(int x, int y, int center_x, int center_y, int *max_radius) {
+    int radius = calc_radius(x, y, center_x, center_y);
+    if (radius > *max_radius)
+        *max_radius = radius;
 }
 
-static int decode_x(int index) {
+int decode_x(int index) {
     return index >> 16;
 }
 
-static int decode_y(int index) {
+int decode_y(int index) {
     return index & ((1 << 16) - 1);
 }
 
-static int isInBorders(int x, int y) {
+int isInBorders(int x, int y) {
     return (x >= 0 && x < SIM_X_SIZE && y >= 0 && y < SIM_Y_SIZE);
 }
 
-static int safeGetUsed(int used[SIM_Y_SIZE][SIM_X_SIZE], int x, int y) {
+int safeGetUsed(int used[SIM_Y_SIZE][SIM_X_SIZE], int x, int y) {
     if (isInBorders(x, y)) {
         return used[y][x];
     }
     return 0;
 }
 
-static void killWalker(
+void killWalker(
     int index,
     int *walkerLast,
     int walkerX[MAX_WALKER_TARGET],
@@ -68,7 +62,16 @@ static void killWalker(
     (*walkerLast)--;
 }
 
-static int applyNearStatic(int x, int y, int used[SIM_Y_SIZE][SIM_X_SIZE]) {
+int applyNearStatic(
+    int x,
+    int y,
+    int used[SIM_Y_SIZE][SIM_X_SIZE],
+    int center_x,
+    int center_y,
+    int *max_radius) {
+    int vector_x[8] = {0, 0, 1, -1, 1, 1, -1, -1};
+    int vector_y[8] = {1, -1, 0, 0, 1, -1, 1, -1};
+
     if (safeGetUsed(used, x, y)) {
         return 1;
     }
@@ -76,45 +79,51 @@ static int applyNearStatic(int x, int y, int used[SIM_Y_SIZE][SIM_X_SIZE]) {
         if (safeGetUsed(used, x + vector_x[i], y + vector_y[i])) {
             used[y][x] = safeGetUsed(used, x + vector_x[i], y + vector_y[i]) + 1;
 
-            update_radius(x, y);
+            update_radius(x, y, center_x, center_y, max_radius);
             return 1;
         }
     }
     return 0;
 }
 
-static void calculateFrame(
+void calculateFrame(
     int walkerX[MAX_WALKER_TARGET],
     int walkerY[MAX_WALKER_TARGET],
     int *walkerLast,
-    int used[SIM_Y_SIZE][SIM_X_SIZE]) {
+    int used[SIM_Y_SIZE][SIM_X_SIZE],
+    int *center_x,
+    int *center_y,
+    int *max_radius) {
+    int vector_x[8] = {0, 0, 1, -1, 1, 1, -1, -1};
+    int vector_y[8] = {1, -1, 0, 0, 1, -1, 1, -1};
+
     while (simHasClick()) {
         int index = simGetClick();
         int x = decode_x(index);
         int y = decode_y(index);
         if (x > 1 && x < SIM_X_SIZE && y > 1 && y < SIM_Y_SIZE) {
             used[y][x] = 1;
-            center_x = x;
-            center_y = y;
-            max_radius = 0;
+            *center_x = x;
+            *center_y = y;
+            *max_radius = 0;
             *walkerLast = -1;
         }
     }
 
     while (*walkerLast < MAX_WALKER_TARGET - 1) {
-        int start_radius = max_radius + 6;
+        int start_radius = *max_radius + 6;
         int side = simRand() % 4;
         int x, y;
-        int border_radius = center_x;
+        int border_radius = *center_x;
 
-        if (SIM_X_SIZE - 1 - center_x > border_radius) {
-            border_radius = SIM_X_SIZE - 1 - center_x;
+        if (SIM_X_SIZE - 1 - *center_x > border_radius) {
+            border_radius = SIM_X_SIZE - 1 - *center_x;
         }
-        if (center_y > border_radius) {
-            border_radius = center_y;
+        if (*center_y > border_radius) {
+            border_radius = *center_y;
         }
-        if (SIM_Y_SIZE - 1 - center_y > border_radius) {
-            border_radius = SIM_Y_SIZE - 1 - center_y;
+        if (SIM_Y_SIZE - 1 - *center_y > border_radius) {
+            border_radius = SIM_Y_SIZE - 1 - *center_y;
         }
 
         if (start_radius > border_radius) {
@@ -136,8 +145,8 @@ static void calculateFrame(
         } else {
             int offset = simRand() % (2 * start_radius + 1) - start_radius;
 
-            x = center_x;
-            y = center_y;
+            x = *center_x;
+            y = *center_y;
 
             if (side == 0) {
                 x -= start_radius;
@@ -166,13 +175,13 @@ static void calculateFrame(
             int type = simRand() % 8;
             int x = walkerX[i] + vector_x[type];
             int y = walkerY[i] + vector_y[type];
-            int kill_radius = max_radius + 24;
+            int kill_radius = *max_radius + 24;
 
-            if (!isInBorders(x, y) || calc_radius(x, y) > kill_radius) {
+            if (!isInBorders(x, y) || calc_radius(x, y, *center_x, *center_y) > kill_radius) {
                 killWalker(i, walkerLast, walkerX, walkerY);
                 --i;
             } else {
-                if (applyNearStatic(x, y, used)) {
+                if (applyNearStatic(x, y, used, *center_x, *center_y, max_radius)) {
                     killWalker(i, walkerLast, walkerX, walkerY);
                     --i;
                 } else {
@@ -184,7 +193,7 @@ static void calculateFrame(
     }
 }
 
-static void drawFrame(
+void drawFrame(
     int walkerX[MAX_WALKER_TARGET],
     int walkerY[MAX_WALKER_TARGET],
     int walkerCnt,
@@ -223,9 +232,12 @@ void app(void) {
     int walkerX[MAX_WALKER_TARGET] = {0};
     int walkerY[MAX_WALKER_TARGET] = {0};
     int walkerLast = -1;
+    int center_x = SIM_X_SIZE / 2 + 1;
+    int center_y = SIM_Y_SIZE / 2 + 1;
+    int max_radius = 0;
 
     while (1) {
-        calculateFrame(walkerX, walkerY, &walkerLast, used);
+        calculateFrame(walkerX, walkerY, &walkerLast, used, &center_x, &center_y, &max_radius);
         drawFrame(walkerX, walkerY, walkerLast, used);
         simFlush();
     }
