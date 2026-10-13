@@ -1,3 +1,7 @@
 /app
 *.o
 /.idea/
+*.out
+/app-with-usage
+*.so
+*.csv
