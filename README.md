@@ -43,7 +43,7 @@ make app-opt.ll
 ```
 - компиляция pass.cpp в shared object
 ```bash
-make libPassю.so
+make libPass.so
 ```
 - компиляция программы с трассировкой
 ```bash
@@ -63,5 +63,5 @@ make run-with-usage
 
 - запуск анализатора
 ```bash
-make analyze len=`(длинна окна)`
+make analyze len=(длинна окна)
 ```

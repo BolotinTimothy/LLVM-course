@@ -1,0 +1,21 @@
+rank,count,percent,pattern
+1,6029312,2.5555,getelementptr <- alloca | getelementptr <- add | getelementptr <- add | load <- getelementptr | shl <- load
+2,6029312,2.5555,getelementptr <- add | getelementptr <- add | load <- getelementptr | shl <- load | call <- shl
+3,6029312,2.5555,getelementptr <- add | load <- getelementptr | shl <- load | call <- shl | add <- call
+4,6029312,2.5555,load <- getelementptr | shl <- load | call <- shl | add <- call | call <- add
+5,6029312,2.5555,shl <- load | call <- shl | add <- call | call <- add | mul <- load
+6,6029312,2.5555,call <- shl | add <- call | call <- add | mul <- load | call <- mul
+7,6029312,2.5555,add <- call | call <- add | mul <- load | call <- mul | add <- call
+8,6029312,2.5555,call <- add | mul <- load | call <- mul | add <- call | call <- add
+9,6029312,2.5555,mul <- load | call <- mul | add <- call | call <- add | shl <- load
+10,6029312,2.5555,call <- mul | add <- call | call <- add | shl <- load | sub <- shl
+11,6029312,2.5555,add <- call | call <- add | shl <- load | sub <- shl | call <- sub
+12,6029312,2.5555,call <- add | shl <- load | sub <- shl | call <- sub | call <- call
+13,6029312,2.5555,shl <- load | sub <- shl | call <- sub | call <- call | icmp <- load
+14,6029312,2.5555,sub <- shl | call <- sub | call <- call | icmp <- load | shl <- call
+15,6029312,2.5555,call <- sub | call <- call | icmp <- load | shl <- call | shl <- call
+16,6029312,2.5555,call <- call | icmp <- load | shl <- call | shl <- call | or <- shl
+17,6029312,2.5555,icmp <- load | shl <- call | shl <- call | or <- shl | or <- shl
+18,6029312,2.5555,shl <- call | shl <- call | or <- shl | or <- shl | or <- or
+19,6029312,2.5555,shl <- call | or <- shl | or <- shl | or <- or | or <- call
+20,6029312,2.5555,or <- shl | or <- shl | or <- or | or <- call | or <- or

@@ -4,4 +4,3 @@
 *.out
 /app-with-usage
 *.so
-*.csv

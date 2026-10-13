@@ -1,0 +1,21 @@
+rank,count,percent,pattern
+1,12598802,5.3400,call <- add
+2,12074324,5.1177,getelementptr <- add
+3,12060348,5.1118,or <- shl
+4,12058624,5.1111,shl <- load
+5,12058624,5.1111,add <- call
+6,12058624,5.1111,shl <- call
+7,12058624,5.1111,or <- or
+8,12058624,5.1111,call <- trunc
+9,11988325,5.0813,br <- icmp
+10,9553938,4.0495,load <- getelementptr
+11,8727810,3.6993,icmp <- load
+12,7132166,3.0230,icmp <- add
+13,6575268,2.7869,call <- sub
+14,6575268,2.7869,call <- call
+15,6050529,2.5645,add <- add
+16,6045013,2.5622,getelementptr <- alloca
+17,6041088,2.5605,trunc <- add
+18,6029312,2.5555,call <- shl
+19,6029312,2.5555,mul <- load
+20,6029312,2.5555,call <- mul
